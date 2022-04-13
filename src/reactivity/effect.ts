@@ -14,26 +14,24 @@ let activeEffect: ReactiveEffect | null = null
 
 export class ReactiveEffect {
   active = true
-  // 用于追踪依赖当前Effect的对象，可以用来清除依赖
+  // to track those deps that includes this Effect, so as to cleanupEffects
   deps: Set<Dep> = new Set()
   constructor(public fn: reactiveFn) {
-    // console.log('ReactiveEffect init')
   }
   run() {
     if (!this.active) {
       return this.fn()
     }
-    // console.log('ReactiveEffect run')
     activeEffect = this
-    const result = this.fn()
+    const returnValue = this.fn()
     activeEffect = null
-    return result
+    return returnValue
   }
   stop() {
     if (this.active) {
       this.active = false
-      // 将所有包含这个effect的deps都从其中清除
-      // 之后这个effect如果没有任何其它饮用，就应该要被GC掉
+      // cleanup this effect from all deps
+      // this effect should be GC(garbage collection) to which if no more strong reference
       cleanupEffect(this)
     }
   }

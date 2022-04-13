@@ -14,7 +14,7 @@ describe('reactivity', () => {
     expect(proxy1).toBe(proxy2)
   })
 
-  it('effect should be re-run', () => {
+  it('total should be updated', () => {
     const product = reactive({ price: 5, quantity: 3, total: 0 })
 
     effect(() => {
