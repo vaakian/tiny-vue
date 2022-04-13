@@ -1,9 +1,9 @@
 import { Key } from "./reactive"
-
+// ONE dependency which is a set of `effects` that should get re-run when property values change
 type Dep = Set<ReactiveEffect>
-// store a set of `ReactiveEffect` for ONE `target`
+// store the dependencies for each property
 type DepsMap = Record<Key, Dep>
-// store a DepsMap for each `target`
+// store the dependencies associated with each reactive object's properties
 type TargetMap = WeakMap<any, DepsMap>
 // reactiveFn should be a function
 type reactiveFn = () => any
@@ -17,13 +17,13 @@ export class ReactiveEffect {
   // 用于追踪依赖当前Effect的对象，可以用来清除依赖
   deps: Set<Dep> = new Set()
   constructor(public fn: reactiveFn) {
-    console.log('ReactiveEffect init')
+    // console.log('ReactiveEffect init')
   }
   run() {
     if (!this.active) {
       return this.fn()
     }
-    console.log('ReactiveEffect run')
+    // console.log('ReactiveEffect run')
     activeEffect = this
     const result = this.fn()
     activeEffect = null

@@ -1,7 +1,7 @@
 // start a vitest
 import { describe, expect, it, test, vi } from 'vitest'
 import { effect } from '../effect'
-import { reactive } from '../reactive'
+import { reactive, readonly, shallowReactive, shallowReadonly } from '../reactive'
 
 describe('reactivity', () => {
   it('proxy the same object that should be cached', () => {
@@ -39,5 +39,64 @@ describe('reactivity', () => {
     product.quantity = 128
     product.quantity = 127
     expect(effectFn).toBeCalledTimes(4)
+  })
+  it('deep reactive', () => {
+    const product = reactive({
+      details: {
+        name: '',
+        count: 0
+      }
+    })
+    const effectFn = vi.fn(() => {
+      product.details.name
+    })
+    effect(effectFn)
+    product.details.name = 'test'
+    product.details.name = 'test2'
+    expect(effectFn).toBeCalledTimes(3)
+    // reference the same object
+    expect(product.details).toBe(product.details)
+  })
+  it('shallow reactive', () => {
+    const raw = {
+      name: 'abc'
+    }
+    const product = shallowReactive({
+      details: raw
+    })
+    expect(product.details).toBe(raw)
+
+    const getRawName = vi.fn(() => {
+      product.details.name
+    })
+    const getDetail = vi.fn(() => {
+      product.details
+    })
+    effect(getRawName)
+    effect(getDetail)
+    // detail === raw, and it is not reactive
+    product.details.name = 'def'
+    product.details.name = 'ghi'
+    product.details.name = 'jkl'
+    expect(getRawName).toBeCalledTimes(1)
+    expect(getDetail).toBeCalledTimes(1)
+    product.details = {
+      name: '777'
+    }
+    expect(getDetail).toBeCalledTimes(2)
+  })
+
+  it('shallow readonly', () => {
+    const shallowReadonlyProduct = shallowReadonly({
+      count: 7,
+      details: {
+        name: 'abc'
+      }
+    })
+    // @ts-ignore
+    shallowReadonlyProduct.count++
+    shallowReadonlyProduct.details.name = 'def'
+    expect(shallowReadonlyProduct.count).toBe(7)
+    expect(shallowReadonlyProduct.details.name).toBe('def')
   })
 })

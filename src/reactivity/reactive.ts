@@ -1,4 +1,4 @@
-import { mutableHandlers } from "./baseHandler"
+import { mutableHandlers, readonlyHandlers, shallowReactiveHandlers, shallowReadonlyHandlers } from "./baseHandlers"
 
 export type Key = string | symbol
 
@@ -8,10 +8,25 @@ export type Key = string | symbol
 // cache the reactive result of each `target`
 type ProxyCache = WeakMap<any, any>
 
-const reactiveCache: ProxyCache = new WeakMap()
+type DeepReadonly<T> = {
+  readonly [P in keyof T]: T[P] extends {} ? DeepReadonly<T[P]> : T[P]
+}
+
+export const enum ReactiveFlags {
+  IS_REACTIVE = '__v_isReactive',
+  IS_READONLY = '__v_isReadonly',
+  RAW = '__v_raw',
+}
+
+// to cache the reactive result of each `target`
+const reactiveMap: ProxyCache = new WeakMap()
+const readonlyMap: ProxyCache = new WeakMap()
+const shallowReactiveMap: ProxyCache = new WeakMap()
+const shallowReadonlyMap: ProxyCache = new WeakMap()
 
 function createReactiveObject<T extends Record<Key, any>>(target: T, proxyMap: ProxyCache, baseHandler: ProxyHandler<T>): T {
   // create a target => depsMap(stores `effects` for each property)
+  // duplicated proxy is cached, safe to use
   if (!proxyMap.get(target)) {
     // proxy the `initTarget`
     const result = new Proxy(target, baseHandler)
@@ -21,5 +36,16 @@ function createReactiveObject<T extends Record<Key, any>>(target: T, proxyMap: P
 }
 
 export function reactive<T extends Record<Key, any>>(target: T): T {
-  return createReactiveObject(target, reactiveCache, mutableHandlers) as T
+  return createReactiveObject(target, reactiveMap, mutableHandlers) as T
+}
+
+export function readonly<T extends Record<Key, any>>(target: T): DeepReadonly<T> {
+  return createReactiveObject(target, readonlyMap, readonlyHandlers) as DeepReadonly<T>
+}
+
+export function shallowReactive<T extends Record<Key, any>>(target: T): T {
+  return createReactiveObject(target, shallowReactiveMap, shallowReactiveHandlers) as T
+}
+export function shallowReadonly<T extends Record<Key, any>>(target: T): Readonly<T> {
+  return createReactiveObject(target, shallowReadonlyMap, shallowReadonlyHandlers) as Readonly<T>
 }
