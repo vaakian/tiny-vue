@@ -1,0 +1,14 @@
+{
+  "name": "tiny-vue",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:vaakian/tiny-vue.git",
+  "author": "vaakian <vaakian@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "test": "vitest"
+  },
+  "devDependencies": {
+    "vitest": "^0.9.3"
+  }
+}

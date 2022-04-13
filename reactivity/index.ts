@@ -32,6 +32,7 @@ function track(target: any, key: Key) {
     depsMap[key].add(currentEffect)
   }
 }
+// re-run the corresponding `effects`
 function trigger(target: any, key: Key) {
   const depsMap = targetMap.get(target)
   if (!depsMap) { return }
