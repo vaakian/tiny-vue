@@ -3,7 +3,7 @@ import { describe, expect, it, test, vi } from 'vitest'
 import { reactive, watchEffect } from '..'
 
 describe('reactivity', () => {
-  it('proxy the same object that should cached', () => {
+  it('proxy the same object that should be cached', () => {
     const target = {
       a: 1,
       b: 2
@@ -31,6 +31,8 @@ describe('reactivity', () => {
     watchEffect(effect)
     product.quantity = 124
     expect(product.total).toBe(product.price * product.quantity)
+    // the first is executed by watchEffect for collecting its dependencies,
+    // the second is executed by the set => trigger
     expect(effect).toBeCalledTimes(2)
   })
 })

@@ -38,27 +38,28 @@ function trigger(target: any, key: Key) {
   if (!depsMap) { return }
   depsMap[key]?.forEach(effect => effect())
 }
+const baseHandler: ProxyHandler<Record<Key, any>> = {
+  get(target, key) {
+    track(target, key)
+    return Reflect.get(target, key)
+  },
+  set(target, key, value) {
+    // same value no trigger
+    if (target[key] !== value) {
+      Reflect.set(target, key, value)
+      // set first then trigger can get the new value
+      trigger(target, key)
+    }
+    return true
+  }
+}
 export function reactive<T extends Record<Key, any>>(initTarget: T): T {
   // create a target => depsMap(stores `effects` for each property)
   if (!targetCache.get(initTarget)) {
     // proxy the `initTarget`
-    const result = new Proxy(initTarget, {
-      get(target, key) {
-        track(target, key)
-        return Reflect.get(target, key)
-      },
-      set(target, key, value) {
-        // same value no trigger
-        if (target[key] !== value) {
-          Reflect.set(target, key, value)
-          // set first then trigger can get the new value
-          trigger(target, key)
-        }
-        return true
-      }
-    })
+    const result = new Proxy(initTarget, baseHandler)
     targetCache.set(initTarget, result)
-    return result
+    return result as T
   } else {
     return targetCache.get(initTarget) as T
   }
