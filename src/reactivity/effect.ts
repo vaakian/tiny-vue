@@ -32,11 +32,14 @@ export class ReactiveEffect {
   stop() {
     if (this.active) {
       this.active = false
+      // 将所有包含这个effect的deps都从其中清除
+      // 之后这个effect如果没有任何其它饮用，就应该要被GC掉
       cleanupEffect(this)
     }
   }
 }
 function cleanupEffect(effect: ReactiveEffect) {
+  effect.deps.forEach(dep => dep.delete(effect))
   // TODO: cleanup
 }
 export function track(target: any, key: Key) {
@@ -47,23 +50,45 @@ export function track(target: any, key: Key) {
   }
   const depsMap = targetMap.get(target) as DepsMap
   if (activeEffect !== null) {
-    if (!depsMap[key]) {
-      depsMap[key] = new Set()
+    let dep = depsMap[key]
+    if (!dep) {
+      dep = depsMap[key] = new Set()
     }
-    depsMap[key].add(activeEffect)
-    activeEffect.deps.add(depsMap[key])
+    trackEffects(dep)
   }
 }
+
+
 // re-run the corresponding `effects`
 export function trigger(target: any, key: Key) {
   const depsMap = targetMap.get(target)
   if (!depsMap) { return }
-  depsMap[key]?.forEach(effect => effect.run())
+  depsMap[key] && triggerEffects(depsMap[key])
 }
 
 export function effect(fn: reactiveFn) {
   const effect = new ReactiveEffect(fn)
-  // 立即执行 => 收集依赖
+  // run immediately => trackEffects
   effect.run()
   return effect
+}
+
+/**
+ * collect {@link activeEffect} to the given {@link dep}
+ * and also mark it on deps of {@link activeEffect}(to cleanup)
+ * @param dep 
+ */
+export function trackEffects(dep: Dep) {
+  if (activeEffect) {
+    dep.add(activeEffect)
+    // deps is for cleanupEffect
+    activeEffect.deps.add(dep)
+  }
+}
+
+// re-run all effects
+export function triggerEffects(dep: Dep) {
+  dep.forEach(effect => {
+    effect.run()
+  })
 }

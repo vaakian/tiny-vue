@@ -1,7 +1,7 @@
 // start a vitest
 import { describe, expect, it, test, vi } from 'vitest'
 import { effect } from '../effect'
-import { reactive, readonly, shallowReactive, shallowReadonly } from '../reactive'
+import { reactive, ReactiveFlags, readonly, shallowReactive, shallowReadonly } from '../reactive'
 
 describe('reactivity', () => {
   it('proxy the same object that should be cached', () => {
@@ -87,16 +87,52 @@ describe('reactivity', () => {
   })
 
   it('shallow readonly', () => {
-    const shallowReadonlyProduct = shallowReadonly({
+    const a = shallowReadonly({
       count: 7,
-      details: {
-        name: 'abc'
+      b: {
+        c: {
+          d: {
+            e: 'x'
+          }
+        }
       }
     })
     // @ts-ignore
-    shallowReadonlyProduct.count++
-    shallowReadonlyProduct.details.name = 'def'
-    expect(shallowReadonlyProduct.count).toBe(7)
-    expect(shallowReadonlyProduct.details.name).toBe('def')
+    a.count++
+    a.b.c.d.e = 'def'
+    expect(a.count).toBe(7)
+    // @ts-ignore
+    expect(a.b[ReactiveFlags.IS_READONLY]).toBe(undefined)
+    // @ts-ignore
+    expect(a[ReactiveFlags.IS_READONLY]).toBe(true)
+    // @ts-ignore
+    expect(a[ReactiveFlags.IS_REACTIVE]).toBe(false)
+    expect(a.b.c.d.e).toBe('def')
+  })
+  it('deep readonly', () => {
+    const a = readonly({
+      count: 7,
+      b: {
+        c: {
+          d: {
+            e: 'x'
+          }
+        }
+      }
+    })
+    // @ts-ignore
+    a.b.c.d.e = 'yhg'
+    // @ts-ignore
+    a.b = 'clean'
+    // @ts-ignore
+    expect(a[ReactiveFlags.IS_READONLY]).toBe(true)
+    // @ts-ignore
+    expect(a.b[ReactiveFlags.IS_READONLY]).toBe(true)
+    // @ts-ignore
+    expect(a.b.c[ReactiveFlags.IS_READONLY]).toBe(true)
+    // @ts-ignore
+    expect(a.b.c.d[ReactiveFlags.IS_READONLY]).toBe(true)
+    // @ts-ignore
+    expect(a.b.c.d.e).toBe('x')
   })
 })

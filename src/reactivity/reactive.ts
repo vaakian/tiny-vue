@@ -18,7 +18,11 @@ export const enum ReactiveFlags {
   RAW = '__v_raw',
 }
 
+
 // to cache the reactive result of each `target`
+// by using WeakMap, the `value` can be automatically garbage collected
+// when `target` is no more strongly referenced
+// such as a property is deleted (delete foo['bar'])
 const reactiveMap: ProxyCache = new WeakMap()
 const readonlyMap: ProxyCache = new WeakMap()
 const shallowReactiveMap: ProxyCache = new WeakMap()
@@ -32,7 +36,7 @@ function createReactiveObject<T extends Record<Key, any>>(target: T, proxyMap: P
     const result = new Proxy(target, baseHandler)
     proxyMap.set(target, result)
   }
-  return proxyMap.get(target) as T
+  return proxyMap.get(target)
 }
 
 export function reactive<T extends Record<Key, any>>(target: T): T {
