@@ -55,6 +55,8 @@ export class ReactiveEffect {
  */
 function cleanupEffect(effect: ReactiveEffect) {
   effect.deps.forEach(dep => dep.delete(effect))
+  // potential memory leak issue
+  effect.deps.clear()
   // TODO: cleanup
 }
 export function track(target: any, key: Key) {

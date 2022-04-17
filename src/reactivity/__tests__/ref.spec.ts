@@ -1,4 +1,4 @@
-import { describe, expect, it, test, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { effect } from '../effect'
 import { isRef, ref, unRef } from '../ref'
 

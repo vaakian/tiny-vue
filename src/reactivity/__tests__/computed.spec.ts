@@ -10,7 +10,7 @@ describe('computed', () => {
     count.value = 2
     expect(double.value).toBe(count.value * 2)
   })
-  it('depends on a computed value', () => {
+  it('one computed depends on another computed value', () => {
     const fourTimes = computed(() => double.value * 2)
     expect(fourTimes.value).toBe(count.value * 4)
     // after count updates, double & fourTime also updates
@@ -21,13 +21,14 @@ describe('computed', () => {
   it('computed cache', () => {
     const count = ref(1)
     const getter = vi.fn(() => count.value * 2)
+    expect(getter).toBeCalledTimes(0)
     const double = computed(getter)
     double.value
     double.value
     double.value
     expect(getter).toBeCalledTimes(1)
   })
-  it('lazy computed if no access to `value`', () => {
+  it.concurrent('lazy computed if no access to `value`', () => {
     const count = ref(1)
     const getter = vi.fn(() => count.value * 2)
     const double = computed(getter)

@@ -3,3 +3,4 @@ __snapshots__
 yarn.lock
 coverage
 .vscode
+nope.spec.ts
