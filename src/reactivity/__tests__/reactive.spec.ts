@@ -11,10 +11,11 @@ import {
   ReactiveFlags,
   readonly,
   shallowReactive,
-  shallowReadonly
+  shallowReadonly,
+  toRaw
 } from '../reactive'
 
-import { effect } from '../effect'
+import { effect, trigger } from '../effect'
 
 describe('reactivity', () => {
   it('proxy the same object that should be cached', () => {
@@ -147,5 +148,25 @@ describe('reactivity', () => {
     expect(a.b.c.d[ReactiveFlags.IS_READONLY]).toBe(true)
     // @ts-ignore
     expect(a.b.c.d.e).toBe('x')
+  })
+  it('toRaw', () => {
+    const target = {
+      family: {
+        name: 'abc',
+        house: {
+          address: '123',
+          size: 120
+        }
+      }
+    }
+    const reactiveTarget = reactive(target)
+    expect(toRaw(reactiveTarget)).toBe(target)
+    expect(reactiveTarget).not.toBe(target)
+
+    expect(toRaw(reactiveTarget.family)).toBe(target.family)
+    expect(toRaw(reactiveTarget.family.house)).toBe(target.family.house)
+  })
+  it('depsMap not exists, triggers nothing', () => {
+    trigger({}, 'a')
   })
 })

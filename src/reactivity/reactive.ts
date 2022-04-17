@@ -43,10 +43,11 @@ const shallowReadonlyMap: ProxyCache = new WeakMap()
 
 function createReactiveObject<T extends Record<Key, any>>(target: T, proxyMap: ProxyCache, baseHandler: ProxyHandler<T>): Reactive<T> {
   // create a target => depsMap(stores `effects` for each property)
-  // duplicated proxy is cached, safe to use
+  // proxy of the same `target` is cached, safe to use
   if (!proxyMap.get(target)) {
     // proxy the `initTarget`
     const result = new Proxy(target, baseHandler)
+    // cache the proxy, will NOT break the origin `target`
     proxyMap.set(target, result)
   }
   return proxyMap.get(target)
