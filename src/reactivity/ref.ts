@@ -32,10 +32,10 @@ export class RefImpl<T> {
     triggerRefValue(this)
   }
 }
-function triggerRefValue(ref: RefImpl<any>) {
+export function triggerRefValue(ref: RefImpl<any>) {
   triggerEffects(ref.dep)
 }
-function trackRefValue(ref: RefImpl<any>) {
+export function trackRefValue(ref: RefImpl<any>) {
   if (!isTracking()) { return }
   trackEffects(ref.dep)
 }
