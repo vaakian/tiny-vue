@@ -41,7 +41,7 @@ function createSetter() {
     // same value no trigger
     if (target[key] !== value) {
       Reflect.set(target, key, value)
-      // set first then trigger can get the new value
+      // set first then trigger gets the new value
       trigger(target, key)
     }
     return true

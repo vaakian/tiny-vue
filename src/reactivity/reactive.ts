@@ -41,6 +41,13 @@ const readonlyMap: ProxyCache = new WeakMap()
 const shallowReactiveMap: ProxyCache = new WeakMap()
 const shallowReadonlyMap: ProxyCache = new WeakMap()
 
+/**
+ * 
+ * @param target object to be proxy
+ * @param proxyMap the cache map (a {@link WeakMap}) to store the proxy result
+ * @param baseHandler handler to be used by the proxy (get & set)
+ * @returns proxy result
+ */
 function createReactiveObject<T extends Record<Key, any>>(target: T, proxyMap: ProxyCache, baseHandler: ProxyHandler<T>): Reactive<T> {
   // create a target => depsMap(stores `effects` for each property)
   // proxy of the same `target` is cached, safe to use
@@ -53,20 +60,47 @@ function createReactiveObject<T extends Record<Key, any>>(target: T, proxyMap: P
   return proxyMap.get(target)
 }
 
+/**
+ * 
+ * @param target object to be proxy
+ * @returns a {@link DeepReactive} object
+ */
 export function reactive<T extends Record<Key, any>>(target: T) {
   return createReactiveObject(target, reactiveMap, mutableHandlers) as DeepReactive<T>
 }
 
+/**
+ * 
+ * @param target object to be proxy
+ * @returns a {@link DeepReadonly} object
+ */
 export function readonly<T extends Record<Key, any>>(target: T): DeepReadonly<T> {
   return createReactiveObject(target, readonlyMap, readonlyHandlers) as DeepReadonly<T>
 }
 
+/**
+ * 
+ * @param target object to be proxy
+ * @returns a shallow {@link Reactive} object
+ */
 export function shallowReactive<T extends Record<Key, any>>(target: T) {
   return createReactiveObject(target, shallowReactiveMap, shallowReactiveHandlers)
 }
+
+/**
+ * 
+ * @param target object to be proxy
+ * @returns a shallow {@link Readonly} object
+ */
 export function shallowReadonly<T extends Record<Key, any>>(target: T): Readonly<T> {
   return createReactiveObject(target, shallowReadonlyMap, shallowReadonlyHandlers) as Readonly<T> & InternalFlag<T>
 }
+
+/**
+ * 
+ * @param target object to be proxy
+ * @returns the original value of the `target`
+ */
 export function toRaw<T>(target: Reactive<T>): T {
   return target[ReactiveFlags.RAW] || target
 }

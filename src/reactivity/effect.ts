@@ -66,7 +66,12 @@ export function track(target: any, key: Key) {
 }
 
 
-// re-run the corresponding `effects`
+/**
+ * re-run the `effects` when the value of the {@link target}'s {@link key} changes
+ * @param target as a key to find the depsMap(property => deps)
+ * @param key specific property to find the deps(a set of effects)
+ * @returns void
+ */
 export function trigger(target: any, key: Key) {
   const depsMap = targetMap.get(target)
   if (!depsMap) { return }
@@ -74,7 +79,12 @@ export function trigger(target: any, key: Key) {
   const dep = depsMap[key]
   dep && triggerEffects(dep)
 }
-
+/**
+ * create a new {@link ReactiveEffect} and run it immediately,
+ * so it will be set to {@link activeEffect} to be collected.
+ * @param fn as the main Reactive Action of the ReactiveEffect
+ * @returns ReactiveEffect instance
+ */
 export function effect(fn: reactiveFn) {
   const effect = new ReactiveEffect(fn)
   // run immediately => trackEffects
@@ -95,13 +105,21 @@ export function trackEffects(dep: Dep) {
   }
 }
 
-// re-run all effects
+/**
+ * re-run all effects of {@link dep}
+ * @param dep a set of effects to be called
+ */
 export function triggerEffects(dep: Dep) {
   dep.forEach(effect => {
     effect.run()
   })
 }
 
+/**
+ * get to know if the `getter` is caused by {@link effect}, otherwise return `false`,
+ * so as NOT to collect the effect.
+ * @returns true if the current execution is a {@link ReactiveEffect}
+ */
 export function isTracking() {
   return shouldTrack && activeEffect !== null
 }

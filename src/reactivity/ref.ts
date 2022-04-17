@@ -7,6 +7,8 @@ import {
   triggerEffects
 } from "./effect"
 
+type UnRef<T> = T extends RefImpl<infer V> ? V : T
+
 export class RefImpl<T> {
   // private _rawValue: T
   private _value: T
@@ -44,7 +46,6 @@ export function createRef<T>(value: T) {
 export function ref<T>(value: T) {
   return createRef(value)
 }
-type UnRef<T> = T extends RefImpl<infer V> ? V : T
 export function unRef<T extends RefImpl<any>>(ref: T) {
   return (isRef(ref) ? ref.value : ref) as UnRef<T>
 }
