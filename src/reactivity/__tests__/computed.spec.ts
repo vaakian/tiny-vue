@@ -18,5 +18,20 @@ describe('computed', () => {
     expect(double.value).toBe(count.value * 2)
     expect(fourTimes.value).toBe(count.value * 4)
   })
+  it('computed cache', () => {
+    const count = ref(1)
+    const getter = vi.fn(() => count.value * 2)
+    const double = computed(getter)
+    double.value
+    double.value
+    double.value
+    expect(getter).toBeCalledTimes(1)
+  })
+  it('lazy computed if no access to `value`', () => {
+    const count = ref(1)
+    const getter = vi.fn(() => count.value * 2)
+    const double = computed(getter)
+    expect(getter).toBeCalledTimes(0)
+  })
 
 })

@@ -21,11 +21,15 @@ export class ComputedRefImpl<T> {
    * those `effects` depends on `this.value`
    */
   public dep: Set<ReactiveEffect> = new Set()
+  private _shouldReCalculate = true
   constructor(private getter: () => T) {
     // when the value of the given getter relies changes.
-    this.effect = effect(() => {
-      this._value = this.getter()
-      // when it updates, trigger all the effects
+    this.effect = new ReactiveEffect(this.getter, () => {
+      // already tagged as `shouldReCalculate`
+      // if no get triggered, it will be ignored
+      if (this._shouldReCalculate) { return }
+      // tag as `shouldReCalculate` for get value() to update.
+      this._shouldReCalculate = true
       triggerComputedValue(this)
     })
   }
@@ -33,6 +37,13 @@ export class ComputedRefImpl<T> {
     // no relation with `this.effect`
     // just tracks those `effects` relies on this.value
     trackComputedValue(this)
+    if (this._shouldReCalculate) {
+      // mark as `shouldReCalculate` to avoid re-run,
+      // changes only if the value in the effect's dep changes.
+      this._shouldReCalculate = false
+      // re-run the effect, it will be collected at the first-run
+      this._value = this.effect.run()
+    }
     return this._value
   }
 }

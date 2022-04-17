@@ -16,7 +16,16 @@ export class ReactiveEffect {
   active = true
   // to track those deps that includes this Effect, so as to cleanupEffects
   deps: Set<Dep> = new Set()
-  constructor(public fn: reactiveFn) {
+  /**
+   * {@link schedular} can only be triggered after `effect.run()`,
+   * because it can be collected only after `effect.run()`.
+   * 
+   * so you should always call `effect.run()` at least once.
+   * @param fn as a getter function
+   * @param scheduler be triggered when those value referred in {@link fn getter} if provided,
+   * otherwise triggers {@link run} instead.
+   */
+  constructor(public fn: reactiveFn, public scheduler?: (effect: ReactiveEffect) => void) {
   }
   run() {
     if (!this.active) {
@@ -108,10 +117,30 @@ export function trackEffects(dep: Dep) {
 /**
  * re-run all effects of {@link dep}
  * @param dep a set of effects to be called
+ * @example
+ * ```ts
+ * const count = ref(1)
+ * const getter = () => count.value
+ * const reactiveEffect = new ReactiveEffect(getter, () => {
+ *  console.log('reactiveEffect re-run')
+ * })
+ * // after manually call `reactiveEffect.run()`
+ * reactiveEffect.run()
+ * // the schedular can be trigger when the values of which the getters accessed changes
+ * count.value = 2
+ * // now the schedular triggers
+ * ```
  */
 export function triggerEffects(dep: Dep) {
   dep.forEach(effect => {
-    effect.run()
+    if (effect.scheduler) {
+      // notify scheduler if it exists
+      // but can only be triggered after `effect.run()` and it has been collected
+      // so you should always call `effect.run()` at least once
+      effect.scheduler(effect)
+    } else {
+      effect.run()
+    }
   })
 }
 
