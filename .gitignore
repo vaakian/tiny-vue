@@ -2,3 +2,4 @@ node_modules
 __snapshots__
 yarn.lock
 coverage
+.vscode

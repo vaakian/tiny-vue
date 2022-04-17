@@ -1,4 +1,9 @@
-import { mutableHandlers, readonlyHandlers, shallowReactiveHandlers, shallowReadonlyHandlers } from "./baseHandlers"
+import {
+  mutableHandlers,
+  readonlyHandlers,
+  shallowReactiveHandlers,
+  shallowReadonlyHandlers
+} from "./baseHandlers"
 
 export type Key = string | symbol
 

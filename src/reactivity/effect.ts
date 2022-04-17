@@ -9,8 +9,8 @@ type TargetMap = WeakMap<any, DepsMap>
 type reactiveFn = () => any
 
 const targetMap: TargetMap = new WeakMap()
-
 let activeEffect: ReactiveEffect | null = null
+let shouldTrack = false
 
 export class ReactiveEffect {
   active = true
@@ -22,8 +22,12 @@ export class ReactiveEffect {
     if (!this.active) {
       return this.fn()
     }
+    // enable effect tracking
+    shouldTrack = true
     activeEffect = this
     const returnValue = this.fn()
+    // disable effect tracking
+    shouldTrack = false
     activeEffect = null
     return returnValue
   }
@@ -36,11 +40,16 @@ export class ReactiveEffect {
     }
   }
 }
+/**
+ * clear itself from all deps that includes the first parameter {@link effect}
+ * @param effect 
+ */
 function cleanupEffect(effect: ReactiveEffect) {
   effect.deps.forEach(dep => dep.delete(effect))
   // TODO: cleanup
 }
 export function track(target: any, key: Key) {
+  if (!isTracking()) { return }
   // deps was created when it's needed!
   // if getter triggers, that property is needed!
   if (!targetMap.get(target)) {
@@ -61,7 +70,9 @@ export function track(target: any, key: Key) {
 export function trigger(target: any, key: Key) {
   const depsMap = targetMap.get(target)
   if (!depsMap) { return }
-  depsMap[key] && triggerEffects(depsMap[key])
+  // dep is a set of `effects`
+  const dep = depsMap[key]
+  dep && triggerEffects(dep)
 }
 
 export function effect(fn: reactiveFn) {
@@ -89,4 +100,8 @@ export function triggerEffects(dep: Dep) {
   dep.forEach(effect => {
     effect.run()
   })
+}
+
+export function isTracking() {
+  return shouldTrack && activeEffect !== null
 }

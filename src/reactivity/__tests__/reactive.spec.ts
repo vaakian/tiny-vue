@@ -1,7 +1,20 @@
 // start a vitest
-import { describe, expect, it, test, vi } from 'vitest'
+import {
+  describe,
+  expect,
+  it,
+  vi
+} from 'vitest'
+
+import {
+  reactive,
+  ReactiveFlags,
+  readonly,
+  shallowReactive,
+  shallowReadonly
+} from '../reactive'
+
 import { effect } from '../effect'
-import { reactive, ReactiveFlags, readonly, shallowReactive, shallowReadonly } from '../reactive'
 
 describe('reactivity', () => {
   it('proxy the same object that should be cached', () => {
