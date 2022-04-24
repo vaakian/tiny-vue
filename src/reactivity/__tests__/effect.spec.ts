@@ -2,7 +2,6 @@ import { describe, expect, it, vi } from 'vitest'
 import { effect } from '../effect'
 import { ref } from '../ref'
 
-
 describe('effect', () => {
   it('when effect stops', () => {
     const count = ref(10)

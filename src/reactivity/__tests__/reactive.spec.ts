@@ -1,10 +1,5 @@
 // start a vitest
-import {
-  describe,
-  expect,
-  it,
-  vi
-} from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import {
   reactive,
@@ -12,7 +7,7 @@ import {
   readonly,
   shallowReactive,
   shallowReadonly,
-  toRaw
+  toRaw,
 } from '../reactive'
 
 import { effect, trigger } from '../effect'
@@ -21,7 +16,7 @@ describe('reactivity', () => {
   it('proxy the same object that should be cached', () => {
     const target = {
       a: 1,
-      b: 2
+      b: 2,
     }
     const proxy1 = reactive(target)
     const proxy2 = reactive(target)
@@ -58,8 +53,8 @@ describe('reactivity', () => {
     const product = reactive({
       details: {
         name: '',
-        count: 0
-      }
+        count: 0,
+      },
     })
     const effectFn = vi.fn(() => {
       product.details.name
@@ -73,10 +68,10 @@ describe('reactivity', () => {
   })
   it('shallow reactive', () => {
     const raw = {
-      name: 'abc'
+      name: 'abc',
     }
     const product = shallowReactive({
-      details: raw
+      details: raw,
     })
     expect(product.details).toBe(raw)
 
@@ -95,7 +90,7 @@ describe('reactivity', () => {
     expect(getRawName).toBeCalledTimes(1)
     expect(getDetail).toBeCalledTimes(1)
     product.details = {
-      name: '777'
+      name: '777',
     }
     expect(getDetail).toBeCalledTimes(2)
   })
@@ -106,10 +101,10 @@ describe('reactivity', () => {
       b: {
         c: {
           d: {
-            e: 'x'
-          }
-        }
-      }
+            e: 'x',
+          },
+        },
+      },
     })
     // @ts-ignore
     a.count++
@@ -129,10 +124,10 @@ describe('reactivity', () => {
       b: {
         c: {
           d: {
-            e: 'x'
-          }
-        }
-      }
+            e: 'x',
+          },
+        },
+      },
     })
     // @ts-ignore
     a.b.c.d.e = 'yhg'
@@ -155,9 +150,9 @@ describe('reactivity', () => {
         name: 'abc',
         house: {
           address: '123',
-          size: 120
-        }
-      }
+          size: 120,
+        },
+      },
     }
     const reactiveTarget = reactive(target)
     expect(toRaw(reactiveTarget)).toBe(target)

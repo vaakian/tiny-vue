@@ -1,5 +1,5 @@
-import { track, trigger } from "./effect"
-import { Key, reactive, ReactiveFlags, readonly } from "./reactive"
+import { track, trigger } from './effect'
+import { Key, reactive, ReactiveFlags, readonly } from './reactive'
 
 // deep and not readonly
 const get = createGetter()
@@ -17,8 +17,7 @@ function createGetter(isReadonly = false, shallow = false) {
     } else if (key === ReactiveFlags.RAW) {
       return target
     }
-
-    let res = Reflect.get(target, key, receiver)
+    const res = Reflect.get(target, key, receiver)
     if (!isReadonly) {
       track(target, key)
     }
@@ -30,7 +29,6 @@ function createGetter(isReadonly = false, shallow = false) {
     // not shallow and current property is NOT an object
     return res
   }
-
 }
 export function isObject(obj: any) {
   return typeof obj === 'object' && obj !== null
@@ -50,7 +48,7 @@ function createSetter() {
 
 export const mutableHandlers: ProxyHandler<Record<Key, any>> = {
   get,
-  set
+  set,
 }
 export const readonlyHandlers: ProxyHandler<Record<Key, any>> = {
   get: readonlyGet,
@@ -59,14 +57,14 @@ export const readonlyHandlers: ProxyHandler<Record<Key, any>> = {
       'Set operation on a "readonly" is not allowed. Use "reactive" instead.'
     )
     return true
-  }
+  },
 }
 
 export const shallowReactiveHandlers: ProxyHandler<Record<Key, any>> = {
   get: shallowReactiveGet,
-  set
+  set,
 }
 export const shallowReadonlyHandlers: ProxyHandler<Record<Key, any>> = {
   get: shallowReadonlyGet,
-  set: readonlyHandlers.set
+  set: readonlyHandlers.set,
 }

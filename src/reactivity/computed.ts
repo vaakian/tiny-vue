@@ -2,12 +2,11 @@
 // const computedValue = computed(getter: () => any);
 
 import {
-  effect,
   isTracking,
   ReactiveEffect,
   trackEffects,
-  triggerEffects
-} from "./effect"
+  triggerEffects,
+} from './effect'
 
 export class ComputedRefImpl<T> {
   // @ts-ignore
@@ -27,7 +26,9 @@ export class ComputedRefImpl<T> {
     this.effect = new ReactiveEffect(this.getter, () => {
       // already tagged as `shouldReCalculate`
       // if no get triggered, it will be ignored
-      if (this._shouldReCalculate) { return }
+      if (this._shouldReCalculate) {
+        return
+      }
       // tag as `shouldReCalculate` for get value() to update.
       this._shouldReCalculate = true
       triggerComputedValue(this)
@@ -51,7 +52,9 @@ export function triggerComputedValue(computed: ComputedRefImpl<any>) {
   triggerEffects(computed.dep)
 }
 export function trackComputedValue(computed: ComputedRefImpl<any>) {
-  if (!isTracking()) { return }
+  if (!isTracking()) {
+    return
+  }
   trackEffects(computed.dep)
 }
 export function computed<T>(getter: () => T) {

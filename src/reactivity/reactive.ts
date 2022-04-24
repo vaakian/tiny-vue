@@ -2,13 +2,13 @@ import {
   mutableHandlers,
   readonlyHandlers,
   shallowReactiveHandlers,
-  shallowReadonlyHandlers
-} from "./baseHandlers"
+  shallowReadonlyHandlers,
+} from './baseHandlers'
 
 export type Key = string | symbol
 
-// A dependency which is a set of `effects` 
-// that should get re-run when values change 
+// A dependency which is a set of `effects`
+// that should get re-run when values change
 // for each property of ONE `target`
 // cache the reactive result of each `target`
 type ProxyCache = WeakMap<any, any>
@@ -19,13 +19,14 @@ export const enum ReactiveFlags {
   RAW = '__v_raw',
 }
 type InternalFlag<T> = {
-  [ReactiveFlags.IS_READONLY]: boolean,
-  [ReactiveFlags.IS_REACTIVE]: boolean,
+  [ReactiveFlags.IS_READONLY]: boolean
+  [ReactiveFlags.IS_REACTIVE]: boolean
   [ReactiveFlags.RAW]: T
 }
-
 type DeepReadonly<T> = {
-  readonly [P in keyof T]: T[P] extends Record<any, any> ? DeepReadonly<T[P]> : T[P]
+  readonly [P in keyof T]: T[P] extends Record<any, any>
+  ? DeepReadonly<T[P]>
+  : T[P]
 } & InternalFlag<T>
 
 type Reactive<T> = T & InternalFlag<T>
@@ -42,13 +43,17 @@ const shallowReactiveMap: ProxyCache = new WeakMap()
 const shallowReadonlyMap: ProxyCache = new WeakMap()
 
 /**
- * 
+ *
  * @param target object to be proxy
  * @param proxyMap the cache map (a {@link WeakMap}) to store the proxy result
  * @param baseHandler handler to be used by the proxy (get & set)
  * @returns proxy result
  */
-function createReactiveObject<T extends Record<Key, any>>(target: T, proxyMap: ProxyCache, baseHandler: ProxyHandler<T>): Reactive<T> {
+function createReactiveObject<T extends Record<Key, any>>(
+  target: T,
+  proxyMap: ProxyCache,
+  baseHandler: ProxyHandler<T>
+): Reactive<T> {
   // create a target => depsMap(stores `effects` for each property)
   // proxy of the same `target` is cached, safe to use
   if (!proxyMap.get(target)) {
@@ -61,43 +66,63 @@ function createReactiveObject<T extends Record<Key, any>>(target: T, proxyMap: P
 }
 
 /**
- * 
+ *
  * @param target object to be proxy
  * @returns a {@link DeepReactive} object
  */
 export function reactive<T extends Record<Key, any>>(target: T) {
-  return createReactiveObject(target, reactiveMap, mutableHandlers) as DeepReactive<T>
+  return createReactiveObject(
+    target,
+    reactiveMap,
+    mutableHandlers
+  ) as DeepReactive<T>
 }
 
 /**
- * 
+ *
  * @param target object to be proxy
  * @returns a {@link DeepReadonly} object
  */
-export function readonly<T extends Record<Key, any>>(target: T): DeepReadonly<T> {
-  return createReactiveObject(target, readonlyMap, readonlyHandlers) as DeepReadonly<T>
+export function readonly<T extends Record<Key, any>>(
+  target: T
+): DeepReadonly<T> {
+  return createReactiveObject(
+    target,
+    readonlyMap,
+    readonlyHandlers
+  ) as DeepReadonly<T>
 }
 
 /**
- * 
+ *
  * @param target object to be proxy
  * @returns a shallow {@link Reactive} object
  */
 export function shallowReactive<T extends Record<Key, any>>(target: T) {
-  return createReactiveObject(target, shallowReactiveMap, shallowReactiveHandlers)
+  return createReactiveObject(
+    target,
+    shallowReactiveMap,
+    shallowReactiveHandlers
+  )
 }
 
 /**
- * 
+ *
  * @param target object to be proxy
  * @returns a shallow {@link Readonly} object
  */
-export function shallowReadonly<T extends Record<Key, any>>(target: T): Readonly<T> {
-  return createReactiveObject(target, shallowReadonlyMap, shallowReadonlyHandlers) as Readonly<T> & InternalFlag<T>
+export function shallowReadonly<T extends Record<Key, any>>(
+  target: T
+): Readonly<T> {
+  return createReactiveObject(
+    target,
+    shallowReadonlyMap,
+    shallowReadonlyHandlers
+  ) as Readonly<T> & InternalFlag<T>
 }
 
 /**
- * 
+ *
  * @param target object to be proxy
  * @returns the original value of the `target`
  */

@@ -1,4 +1,4 @@
-import { Key } from "./reactive"
+import { Key } from './reactive'
 // ONE dependency which is a set of `effects` that should get re-run when property values change
 type Dep = Set<ReactiveEffect>
 // store the dependencies for each property
@@ -14,19 +14,23 @@ let shouldTrack = false
 
 export class ReactiveEffect {
   active = true
+
   // to track those deps that includes this Effect, so as to cleanupEffects
   deps: Set<Dep> = new Set()
+
   /**
    * {@link schedular} can only be triggered after `effect.run()`,
    * because it can be collected only after `effect.run()`.
-   * 
    * so you should always call `effect.run()` at least once.
    * @param fn as a getter function
    * @param scheduler be triggered when those value referred in {@link fn getter} if provided,
    * otherwise triggers {@link run} instead.
    */
-  constructor(public fn: reactiveFn, public scheduler?: (effect: ReactiveEffect) => void) {
-  }
+  constructor(
+    public fn: reactiveFn,
+    public scheduler?: (effect: ReactiveEffect) => void
+  ) { }
+
   run() {
     if (!this.active) {
       return this.fn()
@@ -40,6 +44,7 @@ export class ReactiveEffect {
     activeEffect = null
     return returnValue
   }
+
   stop() {
     if (this.active) {
       this.active = false
@@ -51,16 +56,18 @@ export class ReactiveEffect {
 }
 /**
  * clear itself from all deps that includes the first parameter {@link effect}
- * @param effect 
+ * @param effect
  */
 function cleanupEffect(effect: ReactiveEffect) {
-  effect.deps.forEach(dep => dep.delete(effect))
+  effect.deps.forEach((dep) => dep.delete(effect))
   // potential memory leak issue
   effect.deps.clear()
   // TODO: cleanup
 }
 export function track(target: any, key: Key) {
-  if (!isTracking()) { return }
+  if (!isTracking()) {
+    return
+  }
   // deps was created when it's needed!
   // if getter triggers, that property is needed!
   if (!targetMap.get(target)) {
@@ -70,12 +77,12 @@ export function track(target: any, key: Key) {
   if (activeEffect !== null) {
     let dep = depsMap[key]
     if (!dep) {
-      dep = depsMap[key] = new Set()
+      depsMap[key] = new Set()
+      dep = depsMap[key]
     }
     trackEffects(dep)
   }
 }
-
 
 /**
  * re-run the `effects` when the value of the {@link target}'s {@link key} changes
@@ -85,11 +92,16 @@ export function track(target: any, key: Key) {
  */
 export function trigger(target: any, key: Key) {
   const depsMap = targetMap.get(target)
-  if (!depsMap) { return }
+  if (!depsMap) {
+    return
+  }
   // dep is a set of `effects`
   const dep = depsMap[key]
-  dep && triggerEffects(dep)
+  if (dep) {
+    triggerEffects(dep)
+  }
 }
+
 /**
  * create a new {@link ReactiveEffect} and run it immediately,
  * so it will be set to {@link activeEffect} to be collected.
@@ -106,7 +118,7 @@ export function effect(fn: reactiveFn) {
 /**
  * collect {@link activeEffect} to the given {@link dep}
  * and also mark it on deps of {@link activeEffect}(to cleanup)
- * @param dep 
+ * @param dep
  */
 export function trackEffects(dep: Dep) {
   if (activeEffect) {
@@ -134,7 +146,7 @@ export function trackEffects(dep: Dep) {
  * ```
  */
 export function triggerEffects(dep: Dep) {
-  dep.forEach(effect => {
+  dep.forEach((effect) => {
     if (effect.scheduler) {
       // notify scheduler if it exists
       // but can only be triggered after `effect.run()` and it has been collected
