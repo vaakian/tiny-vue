@@ -30,7 +30,9 @@ describe('computed', () => {
   it.concurrent('lazy computed if no access to `value`', () => {
     const count = ref(1)
     const getter = vi.fn(() => count.value * 2)
-    computed(getter)
+    const double = computed(getter)
     expect(getter).toBeCalledTimes(0)
+    double.value
+    expect(getter).toBeCalledTimes(1)
   })
 })
