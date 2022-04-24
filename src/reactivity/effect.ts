@@ -29,7 +29,7 @@ export class ReactiveEffect {
   constructor(
     public fn: reactiveFn,
     public scheduler?: (effect: ReactiveEffect) => void
-  ) { }
+  ) {}
 
   run() {
     if (!this.active) {
