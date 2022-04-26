@@ -10,7 +10,7 @@ describe('computed', () => {
     expect(double.value).toBe(count.value * 2)
   })
   it('one computed depends on another computed value', () => {
-    const fourTimes = computed(() => (double.value) * 2)
+    const fourTimes = computed(() => double.value * 2)
     expect(fourTimes.value).toBe(count.value * 4)
     // after count updates, double & fourTime also updates
     count.value = 10

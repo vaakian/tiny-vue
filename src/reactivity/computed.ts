@@ -24,14 +24,16 @@ export class ComputedRefImpl<T> {
   constructor(private getter: () => T) {
     // when the value of the given getter relies changes.
     this.effect = new ReactiveEffect(this.getter, () => {
-      // already tagged as `shouldReCalculate`
-      // if no get triggered, it will be ignored
-      if (this._shouldReCalculate) {
-        return
+      // if no `get value`, triggerComputedValue will not be executed if the getter calls/changes
+      if (!this._shouldReCalculate) {
+        // tag as `shouldReCalculate` for get value() to update.
+        this._shouldReCalculate = true
+        triggerComputedValue(this)
+      } else {
+        // already tagged as `shouldReCalculate`
+        // if no get triggered, it will be ignored
+        // do nothing
       }
-      // tag as `shouldReCalculate` for get value() to update.
-      this._shouldReCalculate = true
-      triggerComputedValue(this)
     })
   }
   get value() {
@@ -48,15 +50,18 @@ export class ComputedRefImpl<T> {
     return this._value
   }
 }
+
 export function triggerComputedValue(computed: ComputedRefImpl<any>) {
   triggerEffects(computed.dep)
 }
+
 export function trackComputedValue(computed: ComputedRefImpl<any>) {
   if (!isTracking()) {
     return
   }
   trackEffects(computed.dep)
 }
+
 export function computed<T>(getter: () => T) {
   return new ComputedRefImpl<T>(getter)
 }
